@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Template • TodoMVC</title>
+	<link rel="stylesheet" href="node_modules/todomvc-common/base.css">
+	<link rel="stylesheet" href="node_modules/todomvc-app-css/index.css">
+
+	<link rel="stylesheet" href="css/app.css">
+	<script src="vue.js"></script>
+</head>
+
+<body>
+	<section class="todoapp" id="todoapp">
+		<header class="header">
+			<h1>todos</h1>
+			<input class="new-todo" placeholder="What needs to be done?" autofocus @keydown.enter="addItem">
+		</header>
+
+		<section class="main">
+			<input v-model="toggleAll" id="toggle-all" class="toggle-all" type="checkbox">
+			<label for="toggle-all">Mark all as complete</label>
+			<ul class="todo-list">
+
+				<!--<li v-for="(item,index) in filterItems" class="{completed:item.completed,editing:currentItem===item}">
+					<div class="view">
+						<input class="toggle" type="checkbox" checked>
+						<label>123456789</label>
+						<button class="destroy"></button>
+					</div>
+					<input class="edit" value="Rule the web">
+				</li>-->
+				<!--vue遍历-->
+				<li v-for="(item,index) in filterItems" :class="{completed:item.completed,editing:currentItem===item}">
+					<div class="view">
+						<input class="toggle" type="checkbox" v-model="item.completed">
+						<label @dblclick="toEdit(item)">{{item.content}}</label>
+						<button class="destroy" @click="removeItem(index)"></button>
+					</div>
+					<input class="edit" @blur="finishEdit(item,index,$event)"
+						@keydown.enter="finishEdit(item,index,$event)" @keydown.esc="canceEdit(item,index,$event)"
+						:value="item.content">
+				</li>
+				<!--vue遍历-->
+			</ul>
+		</section>
+
+		<footer class="footer" v-if="items.length">
+
+			<span class="todo-count"><strong>{{remaining}}</strong> {{remaining===1?"item":"items"}} </span>
+
+			<ul class="filters">
+				<li>
+					<a :class="{selected:filterStatus==='all'}" href="#/" @click="filterStatus='all'">All</a>
+				</li>
+				<li>
+					<a :class="{selected:filterStatus==='active'}" href="#/active"
+						@click="filterStatus='active'">Active</a>
+				</li>
+				<li>
+					<a :class="{selected:filterStatus==='completed'}" href="#/completed"
+						@click="filterStatus='completed'">Completed</a>
+				</li>
+			</ul>
+
+			<button class="clear-completed" @click="clearCompleted" v-show="items.length > remaining">Clear
+				completed</button>
+		</footer>
+	</section>
+	<footer class="info">
+		<p>Double-click to edit a todo</p>
+
+		<p>Template by <a href="http://sindresorhus.com">Sindre Sorhus</a></p>
+
+		<p>Created by <a href="http://todomvc.com">you</a></p>
+		<p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+	</footer>
+
+	<script src="node_modules/todomvc-common/base.js"></script>
+	<script src="js/app.js"></script>
+
+	<script>
+
+		new Vue({
+			el: "#todoapp",
+			data: {
+				items: [{
+					id: 1, content: '内容2222', completed: true,
+				},
+				{
+					id: 2, content: '内容3333', completed: false,
+				},
+				{
+					id: 3, content: '内容5555', completed: true,
+				},
+				{
+					id: 4, content: '内容6666', completed: false,
+				},
+				{
+					id: 5, content: '内容7777', completed: true,
+				},
+				{
+					id: 6, content: '内容9999', completed: false,
+				}
+				],
+				filterStatus: 'all',
+				currentItem: ""
+			}, methods: {
+				addItem() {
+					console.log(event.target.value);
+					if (event.target.value.trim().length === 0) {
+						event.target.value = "";
+						return;
+					}
+					var item = {
+						id: !this.items.length ? 1 : this.items[this.items.length - 1].id + 1,
+						content: event.target.value,
+						completed: false
+					}
+					this.items.push(item);
+					event.target.value = "";
+				},
+				removeItem(index) {
+					this.items.splice(index, 1)
+				}, clearCompleted() {
+					this.items = this.items.filter((item) => {
+						return !item.completed
+					})
+				},
+				toEdit(item) {
+					this.currentItem = item
+				}, finishEdit(item, index, event) {
+					item.content = event.target.value;
+					this.currentItem = "";
+				},
+				canceEdit() {
+					this.currentItem = "";
+				}
+			}, computed: {
+				remaining() {
+					var unItem = this.items.filter(function (item) {
+						return !item.completed;
+					})
+					return unItem.length;
+				},
+				filterItems() {
+					switch (this.filterStatus) {
+						case "all":
+							return this.items;
+						case "active":
+							return this.items.filter(function (item) {
+								return !item.completed;
+							});
+						case "completed":
+							return this.items.filter(function (item) {
+								return item.completed;
+
+							})
+					}
+				},
+				toggleAll: {
+					set(newStatus) {
+						this.items.forEach((item) => {
+							item.completed = newStatus;
+						});
+					},
+					get() {
+						return this.remaining === 0;
+					}
+				}
+			}
+		})
+
+	</script>
+</body>
+
+</html>
